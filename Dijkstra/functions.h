@@ -4,20 +4,34 @@
 
 using namespace std;
 
+// returns random number in range [min, max]
+int random(int min, int max){
+    static bool first = true;
+    if (first){
+        srand(time(NULL));
+        first = false;
+    }
+    return min + rand() % ((max + 1) - min);
+}
+
+// returns current time in microseconds
+uint64_t getTime(){
+    return chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now().time_since_epoch()).count();
+}
 
 #ifndef ADJList
 #define ADJList
 class AdjacencyList{
-
 public:
     // adjaency matrix class
     AdjacencyList(int **matrix, int V){
-        // loop the source
         for (int i = 0; i < V; i++){
-            std::vector<int *> subList;
+            vector<int *> subList;
             list.push_back(subList);
-            // loop adjacent nodes
+
             for (int j = 0; j < V; j++){
+
+                //Add the edges
                 if (matrix[i][j] != 0){
                     int *tmp = (int *)malloc(sizeof(int) * 2);
                     tmp[0] = j;
@@ -34,18 +48,17 @@ public:
 
 #ifndef P_Q_ARR
 #define P_Q_ARR
-
 class PriorityQueueArray{
 public:
     PriorityQueueArray(){};
 
-    //Add nodes and distance
+    //Add edge and vertices
     void add(int vertex, int distance){
         int *tmp = new int[2]{vertex, distance};
         queue.push_back(tmp);
     }
 
-    //For changing distance
+    //Edge weight change
     void edit(int vertex, int newDistance){
         // loop through the queue to find the vertex and update the distance
         for (int i = 0; i < queue.size(); i++){
@@ -85,25 +98,25 @@ protected:
 #define PQ_MIN_HEAP
 class PriorityQueueMinHeap{
 public:
-    // empty constructor
+    //empty constructor
     PriorityQueueMinHeap(){};
 
-    // get parent of i node
+    //get parent
     int parent(int i) { return (i - 1) / 2; }
 
-    // get left child of i node
+    // get left child of ith node
     int left(int i) { return (2 * i + 1); }
 
-    // get right child of i node
+    // get right child of ith node
     int right(int i) { return (2 * i + 2); }
 
-    // checks if i node is a leaf
+    // checks if ith node is a leaf
     bool isLeaf(int i) { return 2 * i >= (_heap.size() - 1) && i < _heap.size(); }
 
-    // checks if i node has left child
+    // checks if ith node has left child
     bool hasLeft(int i) { return left(i) < _heap.size(); }
 
-    // checks if i node has right child
+    // checks if ith node has right child
     bool hasRight(int i) { return right(i) < _heap.size(); }
 
 	// swap nodes at i and j
@@ -218,7 +231,8 @@ public:
     }
 
 protected:
-	// heap stores as vector instead of a tree structure
+	//heap implemented as a vector (of pairs) 
+    //tree structure stored in vector
     vector<int *> _heap;
 };
 

@@ -1,5 +1,3 @@
-#include <iostream>
-#include <vector>
 #include <numeric>
 #include <chrono>
 #include <fstream>
@@ -13,49 +11,28 @@ int edge_prob = 10;
 
 using namespace std;
 
-// returns current time in microseconds
-uint64_t getTime(){
-    return chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now().time_since_epoch()).count();
-}
-
-// returns random number in range [min, max]
-int random(int min, int max){
-    static bool first = true;
-    if (first)
-    {
-        srand(time(NULL));
-        first = false;
-    }
-    return min + rand() % ((max + 1) - min);
-}
-
 // generates a graph with number of vertices Ve
-int generateGraph(int **graph, int Ve){
+int createGraph(int **graph, int Ve){
     int edges = 0;
 
     // allocating memory for graph
     for (int i = 0; i < Ve; i++)
         graph[i] = (int *)malloc(sizeof(int) * Ve);
 
-    for (int i = 0; i < Ve; i++)
-    {
-        for (int j = i; j < Ve; j++)
-        {
-            if (i == j)
-            {
+    for (int i = 0; i < Ve; i++){
+        for (int j = i; j < Ve; j++){
+            if (i == j){
                 graph[i][j] = 0;
             }
 
-            else
-            {
+            else{
                 // roll dice
                 int chance = random(0, 100);
 
                 // chance of edge existing
                 // number of edges total is approximately
                 // V(V+1)/2 * (edge_prob/100)
-                if (chance <= edge_prob)
-                {
+                if (chance <= edge_prob){
                     // randomises cost for edge
                     int dist = random(4, 20);
                     // sets cost for V1->V2 and V2->V1
@@ -64,8 +41,7 @@ int generateGraph(int **graph, int Ve){
                     //cout << "Test\n";
                     edges++;
                 }
-                else
-                {
+                else{
                     // no edge between V1 and V2
                     graph[i][j] = 0;
                     graph[j][i] = 0;
@@ -76,22 +52,22 @@ int generateGraph(int **graph, int Ve){
     return edges;
 }
 
-uint64_t dijkstaA(int **graph, int Ve, int source){
+uint64_t dijkstra1(int **graph, int Ve, int source){
     uint64_t start = getTime();
 
-    // d keeps track of shortest distance of vertex from source
-    // pi keeps track of parent of vertex
+    //shortest distance of vertex from source
     int* d = new int[Ve];
+
+    //parent of vertex on shortest path
     int* pi = new int[Ve];
 
-    // visited keeps track of whether vertex has been completely visited
+    //visited vertices
     bool* visited = new bool[Ve];
 
-    // our priority queue for getting next shortest distance
+    //priority queue for getting next shortest distance
     PriorityQueueArray prioQueue;
 
-    for (int i = 0; i < Ve; i++)
-    {
+    for (int i = 0; i < Ve; i++){
         // distance of source from source is 0
         if (i == source)
             d[i] = 0;
@@ -104,18 +80,16 @@ uint64_t dijkstaA(int **graph, int Ve, int source){
         prioQueue.add(i, d[i]);
     }
 
-    // continue until priority queue is empty, i.e. no more vertices to explore
-    while (!prioQueue.isEmpty())
-    {
+    //while priority queue has vertices
+    while (!prioQueue.isEmpty()){
         int *pair = prioQueue.pop();
         int u = pair[0], dist = pair[1];
 
         visited[u] = true;
 
-        // loops through distance for all vertices from u by looking at the adj matrix
-        // super inefficient for an adj matrix but it's how we keep track of edges
-        for (int i = 0; i < Ve; i++)
-        {
+        //loops through distance for all vertices from u by looking at the adj matrix
+        //to keep track of edges
+        for (int i = 0; i < Ve; i++){
             int vertex = i;
             int distanceFromU = graph[u][i];
 
@@ -136,7 +110,7 @@ uint64_t dijkstaA(int **graph, int Ve, int source){
     return timeTaken;
 }
 
-uint64_t dijkstaB(AdjacencyList Adj, int Ve, int source){
+uint64_t dijkstra2(AdjacencyList Adj, int Ve, int source){
     uint64_t start = getTime();
 
     // d keeps track of shortest distance of vertex from source
@@ -150,8 +124,7 @@ uint64_t dijkstaB(AdjacencyList Adj, int Ve, int source){
     // our priority queue for getting next shortest distance
     PriorityQueueMinHeap prioQueue;
 
-    for (int i = 0; i < Ve; i++)
-    {
+    for (int i = 0; i < Ve; i++){
         // distance of source from source is 0
         if (i == source)
             d[i] = 0;
@@ -167,15 +140,14 @@ uint64_t dijkstaB(AdjacencyList Adj, int Ve, int source){
     long debugB = 0;
 
     // continue until priority queue is empty, i.e. no more vertices to explore
-    while (!prioQueue.isEmpty())
-    {
+    while (!prioQueue.isEmpty()){
         int *pair = prioQueue.pop();
         int u = pair[0], dist = pair[1];
 
         visited[u] = true;
 
-        // loops through distance for all vertices from u by looking at the adj list
-        // surprisingly this should be more efficient than our adj matrix
+        //loops through distance for all vertices from u by looking at the adj list
+        //should be more efficient than our adj matrix
         for (int i = 0; i < Adj.list[u].size(); i++)
         {
             int *edge = Adj.list[u][i];
@@ -203,19 +175,17 @@ int main(){
     outfile << "avgVertices" << "\t" << "avgEdges" << "\t" << "adjTime" << "\t" << "listTime" << endl;
     outfile.close();
 
-    for (int Ve = 50; Ve <= 1000; Ve += 50)
-    {
+    for (int Ve = 50; Ve <= 1000; Ve += 50){
         vector<uint64_t> ATimes, BTimes;
         vector<int> edgeCount;
 
-        for (int i = 0; i < trials; i++)
-        {
+        for (int i = 0; i < trials; i++){
             cout << i << " ";
             // our graph in adj matrix form
             int **graph = new int *[Ve];
 
             // generates and stores the graph
-            int edges = generateGraph(graph, Ve);
+            int edges = createGraph(graph, Ve);
 
             // our graph in adj list form
             // using double pointer because 2d arrays can't be passed as argument
@@ -224,12 +194,11 @@ int main(){
                 tmp[i] = graph[i];
             AdjacencyList Adj(tmp, Ve);
 
-            // for simplicity's sake, let us choose 0 as our source
             int source = 0;
 
             // dijkstra functions return the time taken in microseconds
-            uint64_t timeTakenA = dijkstaA(graph, Ve, source);
-            uint64_t timeTakenB = dijkstaB(Adj, Ve, source);
+            uint64_t timeTakenA = dijkstra1(graph, Ve, source);
+            uint64_t timeTakenB = dijkstra2(Adj, Ve, source);
 
             // append to vectors
             ATimes.push_back(timeTakenA);
