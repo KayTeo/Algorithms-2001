@@ -1,0 +1,2 @@
+s value, combineSort time, mergeSort time
+6, 3966.27, 11086.5

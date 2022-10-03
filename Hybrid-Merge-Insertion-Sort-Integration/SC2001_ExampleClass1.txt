@@ -1,0 +1,210 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <vector>
+#include <iostream>
+#include <ctime>
+
+using namespace std;
+
+int s = 3;
+
+int insertionSort(int arr[],int n, int IS_count)
+{
+    int i, key, j;
+
+    for(i=1;i<n;i++)
+    {
+        key=arr[i];
+        j=i-1;
+
+        //Move elements of arr[], that are greater than key, to one position ahead of their current position
+        while(j>=0&& arr[j]>key)
+        {
+            arr[j+1]=arr[j];
+            j=j-1;
+            IS_count++;
+        }
+        if(j>=0 && arr[j]<key)
+        IS_count++;
+
+        arr[j+1]=key;
+    }
+
+
+    return IS_count;
+}
+
+//Code for in place merging of two subarrays
+//array is divided by pointers, start to mid and mid + 1 to end
+int merge(int nums[], int start, int mid, int end, int M_count){
+
+    //Calculate size and declare var for copies of left and right subarrays
+    int leftSize = mid - start + 1;
+    int rightSize = end - mid;
+
+
+    int *left = new int[leftSize];
+    int *right = new int[rightSize];
+
+    //Copy left subarray into left
+    for(int leftC = 0; leftC < leftSize; leftC++){
+        left[leftC] = nums[start+leftC];
+    }
+
+    //Copy right subarray into right
+    for(int rightC = 0; rightC < rightSize; rightC++){
+        right[rightC] = nums[mid +  1 + rightC];
+    }
+
+    //Start of merging, three counters for left, right and complete arrays
+    int mainC = start;
+    int leftC = 0;
+    int rightC = 0;
+
+    while(leftC < leftSize && rightC < rightSize){
+        if(left[leftC] < right[rightC]){
+            nums[mainC] = left[leftC];
+            leftC++;
+        }
+        else{
+            nums[mainC] = right[rightC];
+            rightC++;
+        }
+        mainC++;
+
+        M_count++;
+    }
+
+    //If there is "leftover" elements not inserted in left or right subarrays
+    while(leftC < leftSize){
+        nums[mainC] = left[leftC];
+        leftC++;
+        mainC++;
+
+        M_count++;
+    }
+    while(rightC < rightSize){
+        nums[mainC] = right[rightC];
+        rightC++;
+        mainC++;
+
+        M_count++;
+    }
+
+    return M_count;
+}
+
+//mergeSort algorith, start and end are indexes e.g. start at 0 and end at 4 to sort the whole of a 5 element array
+//Uses arrays ie pass by reference, so changes to nums is changed everywhere and no return value
+int mergeSort(int nums[], int start, int end, int MS_counter){
+    int holder;
+
+    //Base case termination
+    if(start == end){
+        return MS_counter;
+    }
+
+    int size = end - start;
+    int mid = start + (end - start) / 2;
+
+    mergeSort(nums, start, mid, MS_counter);
+    mergeSort(nums, mid + 1, end, MS_counter);
+
+    MS_counter = merge(nums, start, mid, end, MS_counter);
+}
+
+int combineSort(int nums[], int start, int end, int counter){
+    int holder;
+
+    //Base case termination
+    if(start == end){
+        return counter;
+    }
+
+    int size = end - start;
+    int mid = start + (end - start) / 2;
+
+    //Calculate sizes of left and right array for insertionSort function
+    int leftSize = mid - start + 1;
+    int rightSize = end - mid;
+
+    //Use insertion sort if array is equal to or smaller than s
+    if( leftSize <= s){
+        //printf("Insertion sort used\n");
+        counter = insertionSort(nums + start, leftSize, counter);
+    }
+    else{
+        counter = combineSort(nums, start, mid, counter);
+    }
+
+    if(rightSize <= s){
+        counter = insertionSort(nums + mid + 1, rightSize, counter);
+    }
+    else{
+        counter = combineSort(nums, mid + 1, end, counter);
+    }
+
+    counter = merge(nums, start, mid, end, counter);
+}
+
+void printArray(int arr[],int n)
+{
+    int i;
+    for(i=0;i<n;i++)
+    {
+        cout<<arr[i]<<" ";
+    }
+    cout<<endl;
+}
+
+//Generates number in range
+//Note: use srand only once in main as using srand withint 1 second of each other in different levels of code sets seed to the same value
+int generateVal(int lower, int upper){
+
+    //include upper
+    upper++;
+    int r = (rand() % upper) + lower; //Generate number between 1000-10million
+    return r;
+}
+
+//Returns an array (pointer to int) of size lower to upper inclusive
+int* randomArray(int arraySize, int lowerVal, int upperVal)
+{
+    cout<<"The array size is ";
+    cout<<arraySize<<"\n";
+
+    int* randArr = new int[arraySize];
+
+    for(int i=0;i<arraySize;i++)
+    {
+        randArr[i]=(rand() % upperVal) + lowerVal + 1; //Generate number between range lowerVal to upperVal
+    }
+
+    //printf("Random array is: ");
+    //printArray(randArr,arraySize);
+    return randArr;
+}
+
+int main(){
+    srand(time(NULL)); //Put this once in main to ensure that the number is different everytime the code runs
+
+    int counter = 0;
+
+
+    for(int i = 0; i < 1; i++){
+        int arrSize = generateVal(1000, 10000000);
+        printf("Random num is %d: \n", arrSize);
+        int* randomArr = randomArray(arrSize, 1, arrSize);
+        counter = combineSort(randomArr, 0, arrSize - 1, counter);
+        //printf("Sorted array is: ");
+        //printArray(randomArr, arrSize);
+        //printf("\n");
+    }
+
+
+    cout << "Number of key comparisons: " << counter << "\n";
+
+    //get the random values of array size and variables in it
+    //randomArray();
+    return 0;
+}
