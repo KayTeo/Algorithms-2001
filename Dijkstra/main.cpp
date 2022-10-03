@@ -14,14 +14,12 @@ int edge_prob = 10;
 using namespace std;
 
 // returns current time in microseconds
-uint64_t getTime()
-{
+uint64_t getTime(){
     return chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now().time_since_epoch()).count();
 }
 
 // returns random number in range [min, max]
-int random(int min, int max)
-{
+int random(int min, int max){
     static bool first = true;
     if (first)
     {
@@ -32,8 +30,7 @@ int random(int min, int max)
 }
 
 // generates a graph with number of vertices Ve
-int generateGraph(int **graph, int Ve)
-{
+int generateGraph(int **graph, int Ve){
     int edges = 0;
 
     // allocating memory for graph
@@ -79,8 +76,7 @@ int generateGraph(int **graph, int Ve)
     return edges;
 }
 
-uint64_t dijkstaA(int **graph, int Ve, int source)
-{
+uint64_t dijkstaA(int **graph, int Ve, int source){
     uint64_t start = getTime();
 
     // d keeps track of shortest distance of vertex from source
@@ -140,8 +136,7 @@ uint64_t dijkstaA(int **graph, int Ve, int source)
     return timeTaken;
 }
 
-uint64_t dijkstaB(AdjacentList Adj, int Ve, int source)
-{
+uint64_t dijkstaB(AdjacencyList Adj, int Ve, int source){
     uint64_t start = getTime();
 
     // d keeps track of shortest distance of vertex from source
@@ -201,8 +196,7 @@ uint64_t dijkstaB(AdjacentList Adj, int Ve, int source)
     return timeTaken;
 }
 
-int main()
-{
+int main(){
 
     ofstream outfile;
     outfile.open("result.txt", ios_base::app);
@@ -228,7 +222,7 @@ int main()
             int **tmp = new int *[Ve];
             for (int i = 0; i < Ve; i++)
                 tmp[i] = graph[i];
-            AdjacentList Adj(tmp, Ve);
+            AdjacencyList Adj(tmp, Ve);
 
             // for simplicity's sake, let us choose 0 as our source
             int source = 0;
