@@ -1,6 +1,7 @@
 #include<cstdio>
 #include <vector>
 #include<iostream>
+#include <numeric>
 
 using namespace std;
 
@@ -19,11 +20,9 @@ uint64_t getTime(){
     return chrono::duration_cast<chrono::microseconds>(chrono::system_clock::now().time_since_epoch()).count();
 }
 
-#ifndef ADJList
-#define ADJList
 class AdjacencyList{
 public:
-    // adjaency matrix class
+    //adjaency list class
     AdjacencyList(int **matrix, int V){
         for (int i = 0; i < V; i++){
             vector<int *> subList;
@@ -41,13 +40,10 @@ public:
             }
         }
     }
-    // essentially a triple pointer
+    //list data
     vector<vector<int *>> list;
 };
-#endif
 
-#ifndef P_Q_ARR
-#define P_Q_ARR
 class PriorityQueueArray{
 public:
     PriorityQueueArray(){};
@@ -60,7 +56,7 @@ public:
 
     //Edge weight change
     void edit(int vertex, int newDistance){
-        // loop through the queue to find the vertex and update the distance
+        // loop through the queue to find the vertex and update the currently known distance
         for (int i = 0; i < queue.size(); i++){
             if (queue[i][0] == vertex){
                 queue[i][1] = newDistance;
@@ -92,10 +88,7 @@ protected:
     //vector queue
     vector<int *> queue;
 };
-#endif
 
-#ifndef PQ_MIN_HEAP
-#define PQ_MIN_HEAP
 class PriorityQueueMinHeap{
 public:
     //empty constructor
@@ -235,5 +228,3 @@ protected:
     //tree structure stored in vector
     vector<int *> _heap;
 };
-
-#endif

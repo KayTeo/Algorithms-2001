@@ -1,17 +1,16 @@
-#include <numeric>
 #include <chrono>
 #include <fstream>
 #include "functions.h"
 
 //Number of trials to run
-int trials = 100;
+int trials = 20;
 
 //Probability of two vertices being connected, edge_prob / 100
-int edge_prob = 10;
+int edge_prob = 60;
 
 using namespace std;
 
-// generates a graph with number of vertices Ve
+//generates adjacency matrix
 int createGraph(int **graph, int Ve){
     int edges = 0;
 
@@ -26,11 +25,11 @@ int createGraph(int **graph, int Ve){
             }
 
             else{
-                // roll dice
+                //assign chance of edge existing between two vertices
                 int chance = random(0, 100);
 
-                // chance of edge existing
-                // number of edges total is approximately
+                //chance of edge existing
+                //number of edges total is approximately
                 // V(V+1)/2 * (edge_prob/100)
                 if (chance <= edge_prob){
                     // randomises cost for edge
@@ -64,43 +63,46 @@ uint64_t dijkstra1(int **graph, int Ve, int source){
     //visited vertices
     bool* visited = new bool[Ve];
 
-    //priority queue for getting next shortest distance
+    //array priority queue for getting next shortest distance
     PriorityQueueArray prioQueue;
 
+    //Initialise graph
     for (int i = 0; i < Ve; i++){
         // distance of source from source is 0
-        if (i == source)
+        if (i == source){
             d[i] = 0;
-        else
+        }
+        else{
             d[i] = INT32_MAX;
-
+        }
         pi[i] = -1;
         visited[i] = false;
 
         prioQueue.add(i, d[i]);
     }
 
-    //while priority queue has vertices
+    //while priority queue has vertices, ie go through all nodes O(V)
     while (!prioQueue.isEmpty()){
         int *pair = prioQueue.pop();
         int u = pair[0], dist = pair[1];
 
         visited[u] = true;
 
-        //loops through distance for all vertices from u by looking at the adj matrix
-        //to keep track of edges
+        //Find closest neighbour, worst case O(V)
         for (int i = 0; i < Ve; i++){
             int vertex = i;
-            int distanceFromU = graph[u][i];
+            int distanceFromCurrent = graph[u][i];
 
-            // if vertex is connected, hasn't been visited and the (distance of u from source) + (distance of vertex from u)
-            // is less than current distance of vertex from source
-            if (distanceFromU != 0 && !visited[i] && (d[u] + distanceFromU) < d[i])
-            {
-                // gets the shorter distance and updates the priority queue, distance array and parent array
-                int shorterDistance = d[u] + distanceFromU;
+            //if vertex is connected (distanceFromCurrent != 0)
+            //if hasn't been visited (!visited[i]
+            //if the (distance of u from source) + (distance of vertex from u) is less than current distance of vertex from source
+            if (distanceFromCurrent != 0 && !visited[i] && (d[u] + distanceFromCurrent) < d[i]){
+                //gets the shorter distance and updates the priority queue, distance array and parent array
+                int shorterDistance = d[u] + distanceFromCurrent;
                 d[i] = shorterDistance;
                 pi[i] = u;
+
+                //Loop through queue to find and update 
                 prioQueue.edit(i, shorterDistance);
             }
         }
@@ -113,15 +115,16 @@ uint64_t dijkstra1(int **graph, int Ve, int source){
 uint64_t dijkstra2(AdjacencyList Adj, int Ve, int source){
     uint64_t start = getTime();
 
-    // d keeps track of shortest distance of vertex from source
-    // pi keeps track of parent of vertex
+    //d keeps track of shortest distance of vertex from source
     int* d = new int[Ve];
+
+    //pi keeps track of parent of vertex
     int* pi = new int[Ve];
 
-    // visited keeps track of whether vertex has been completely visited
+    //keeps track of whether vertex has been completely visited
     bool* visited = new bool[Ve];
 
-    // our priority queue for getting next shortest distance
+    //priority queue for getting next shortest distance
     PriorityQueueMinHeap prioQueue;
 
     for (int i = 0; i < Ve; i++){
@@ -137,9 +140,7 @@ uint64_t dijkstra2(AdjacencyList Adj, int Ve, int source){
         prioQueue.add(i, d[i]);
     }
 
-    long debugB = 0;
-
-    // continue until priority queue is empty, i.e. no more vertices to explore
+    //continue until priority queue is empty, i.e. no more vertices to explore
     while (!prioQueue.isEmpty()){
         int *pair = prioQueue.pop();
         int u = pair[0], dist = pair[1];
@@ -147,16 +148,13 @@ uint64_t dijkstra2(AdjacencyList Adj, int Ve, int source){
         visited[u] = true;
 
         //loops through distance for all vertices from u by looking at the adj list
-        //should be more efficient than our adj matrix
         for (int i = 0; i < Adj.list[u].size(); i++)
         {
             int *edge = Adj.list[u][i];
-            int vertex = edge[0], distanceFromU = edge[1];
+            int vertex = edge[0], distanceFromCurrent = edge[1];
 
-            if (!visited[vertex] && (d[u] + distanceFromU) < d[vertex])
-            {
-                debugB++;
-                int shorterDistance = d[u] + distanceFromU;
+            if (!visited[vertex] && (d[u] + distanceFromCurrent) < d[vertex]){
+                int shorterDistance = d[u] + distanceFromCurrent;
                 d[vertex] = shorterDistance;
                 pi[vertex] = u;
                 prioQueue.edit(vertex, shorterDistance);
@@ -181,14 +179,15 @@ int main(){
 
         for (int i = 0; i < trials; i++){
             cout << i << " ";
-            // our graph in adj matrix form
+            //graph in adj matrix form
             int **graph = new int *[Ve];
 
-            // generates and stores the graph
+            //generates and stores the graph
+            //returns number of edges, graph parameter passed by reference
             int edges = createGraph(graph, Ve);
 
-            // our graph in adj list form
-            // using double pointer because 2d arrays can't be passed as argument
+            //our graph in adj list form
+            //using double pointer because 2d arrays can't be passed as argument
             int **tmp = new int *[Ve];
             for (int i = 0; i < Ve; i++)
                 tmp[i] = graph[i];
@@ -205,9 +204,6 @@ int main(){
             BTimes.push_back(timeTakenB);
             edgeCount.push_back(edges);
 
-            // for some reason this isn't deallocating variables
-            // properly so the program takes up a metric fuck ton of memory
-            // no joke
             for (int i = 0; i < Ve; i++)
             {
                 delete graph[i];
@@ -217,9 +213,9 @@ int main(){
             delete tmp;
         }
 
-        uint64_t avgA = (std::accumulate(ATimes.begin(), ATimes.end(), 0) / trials);
-        uint64_t avgB = (std::accumulate(BTimes.begin(), BTimes.end(), 0) / trials);
-        int avgEdges = (std::accumulate(edgeCount.begin(), edgeCount.end(), 0) / trials);
+        uint64_t avgA = (accumulate(ATimes.begin(), ATimes.end(), 0) / trials);
+        uint64_t avgB = (accumulate(BTimes.begin(), BTimes.end(), 0) / trials);
+        int avgEdges = (accumulate(edgeCount.begin(), edgeCount.end(), 0) / trials);
 
         cout << "\nFor " << trials << " trials:\nAdjacency matrix + priority queue average time:\t" << avgA << " microseconds"
              << "\nAdjacency list + minimizing heap average time:\t" << avgB << " microseconds" << endl;
