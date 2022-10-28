@@ -1,12 +1,15 @@
 #include<iostream>
 #include<vector>
+#include<stdio.h>
 
 using namespace std;
 
 //Capacity
 vector<int> weight;
 vector<int> profit;
-int c = 100; //capacity
+int elements = 0;
+int maxWeight = 0;
+int c = 0; //capacity
 vector<vector<int>> dpMatrix;
 
 //wIndex and pIndex tracks last element of knapsack vectors
@@ -79,8 +82,8 @@ void knapsackBottomUp(int maxWeight, int elements){
 
 int main(){
 
-    int elements = 3;
-    int maxWeight = 10;
+    elements = 3;
+    maxWeight = 14;
     c = maxWeight; 
 
     dpMatrix.resize(elements);
@@ -88,8 +91,8 @@ int main(){
         dpMatrix[i].resize(maxWeight);
     }
 
-    weight = {1, 2, 3};
-    profit = {10, 15, 40};
+    weight = {4, 6, 8};
+    profit = {7, 6, 9};
 
     knapsackBottomUp(maxWeight, elements);
     /*
@@ -97,9 +100,56 @@ int main(){
 
     //cout << "\n\nFinal answer: " << test;
 
+    cout << "\n\nPart (2):\n";
+    cout << "Weights: {";
+    for(int i = 0; i < weight.size() - 1; i++){
+        cout << weight[i] << ", ";
+    }
+    cout << weight[weight.size() - 1] << "}\n";
+
+    cout << "Profit:  {";
+    for(int i = 0; i < profit.size() - 1; i++){
+        cout << profit[i] << ", ";
+    }
+    cout << profit[profit.size() - 1] << "}\n";
+
     for(int i = 0; i < dpMatrix.size(); i++){
         for(int j = 0; j < dpMatrix[i].size(); j++){
-            cout << dpMatrix[i][j] << " ";
+            printf("%5d", dpMatrix[i][j]);
+        }
+        cout << "\n";
+    }
+
+    elements = 3; //n value
+    maxWeight = 14;
+    c = maxWeight; 
+
+    dpMatrix.resize(elements);
+    for(int i = 0; i < elements; i++){
+        dpMatrix[i].resize(maxWeight);
+    }
+
+    weight = {5, 6, 8};
+    profit = {7, 6, 9};
+
+    knapsackBottomUp(maxWeight, elements);
+
+    cout << "\n\nPart (3):\n";
+    cout << "Weights: {";
+    for(int i = 0; i < weight.size() - 1; i++){
+        cout << weight[i] << ", ";
+    }
+    cout << weight[weight.size() - 1] << "}\n";
+
+    cout << "Profit:  {";
+    for(int i = 0; i < profit.size() - 1; i++){
+        cout << profit[i] << ", ";
+    }
+    cout << profit[profit.size() - 1] << "}\n";
+
+    for(int i = 0; i < dpMatrix.size(); i++){
+        for(int j = 0; j < dpMatrix[i].size(); j++){
+            printf("%5d", dpMatrix[i][j]);
         }
         cout << "\n";
     }
